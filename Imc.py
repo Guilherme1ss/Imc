@@ -1,40 +1,40 @@
-while True:
-    peso = input ('Digite o seu peso em kg: ')
-    peso = peso.replace(",", ".")
-    if peso.replace(".", "", 1).isdigit():
-        try:
-            peso = float(peso)
-            break
-        except ValueError:
-            print ("Valor inválido. Digite apenas números.")
-    else:
-        print ("Valor inválido. Digite apenas números.")
+import PySimpleGUI as sg
+
+sg.theme('DarkAmber')
+layout = [ [sg.Text('Digite o seu peso em Kg:'), sg.InputText(key='peso', enable_events=True)],
+           [sg.Text('Digite a sua altura em metros:'), sg.InputText(key='altura', enable_events=True)],
+           [sg.Button('Calcular', bind_return_key=True)],
+           [sg.Text('IMC: ', key='resultado'), sg.Text('Status: ',key='status')] ]
+
+window = sg.Window('Calculadora de IMC', layout, return_keyboard_events=True)
 
 while True:
-    altura = input ('Digite a sua altura em metros: ')
-    altura = altura.replace(",", ".")
-    if altura.replace(".", "", 1).isdigit():
+    event, values = window.read()
+    if event == sg.WIN_CLOSED:
+        break
+    if event == 'Calcular':
         try:
-            altura = float(altura)
-            break
+            peso = float(values['peso'].replace(",", '.'))
+            altura = float(values['altura'].replace(',', '.'))
+            imc = peso / (altura ** 2)
+            if imc <= 18.5:
+                nivelImc = ("Abaixo do peso")
+            elif imc > 18.5 and imc <= 24.9:
+                nivelImc = ("Normal")
+            elif imc > 24.9 and imc <= 29.9:
+                nivelImc = ("Sobrepeso")
+            elif imc > 29.9 and imc <= 34.9:
+                nivelImc = ("Obesidade grau 1")
+            elif imc > 34.9 and imc <= 39.9:
+                nivelImc = ("Obesidade grau 2")
+            elif imc >= 40:
+                nivelImc = ("Obesidade mórbida.")
+            window['resultado'].update(f'IMC: {imc:.2f}')
+            window['status'].update(f'Status: {nivelImc}')
         except ValueError:
-            print ("Valor inválido. Digite apenas números.")
-    else:
-        print ("Valor inválido. Digite apenas números.")
+            sg.popup_error('Entrada inválida. Certifique-se de que os campos de entrada contenham números válidos.')
+    elif event == 'peso' or event == 'altura':
+        if values[event] and values[event][-1] == '\n':
+            window['Calcular'].click()
 
-imc = peso/altura ** 2 
-
-if imc <= 18.5:
-    nivelImc = ("abaixo do peso.")
-elif imc > 18.5 and imc <= 24.9:
-    nivelImc = ("normal.")
-elif imc > 24.9 and imc <= 29.9:
-    nivelImc = ("sobrepeso.")
-elif imc > 29.9 and imc <= 34.9:
-    nivelImc = ("obesidade grau 1.")
-elif imc > 34.9 and imc <= 39.9:
-    nivelImc = ("obesidade grau 2.")
-elif imc >= 40:
-    nivelImc = ("obesidade mórbida.")
-
-print ("Seu IMC é", "{:.1f}".format(imc) + ',', "isso é considerado", nivelImc)
+window.close()
